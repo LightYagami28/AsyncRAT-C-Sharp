@@ -118,11 +118,10 @@ namespace Client.Algorithm
                         aesProvider.IV = iv;
 
                         using (var cs = new CryptoStream(ms, aesProvider.CreateDecryptor(), CryptoStreamMode.Read))
+                        using (var decrypted = new MemoryStream())
                         {
-                            byte[] temp = new byte[ms.Length - IvLength + 1];
-                            byte[] data = new byte[cs.Read(temp, 0, temp.Length)];
-                            Buffer.BlockCopy(temp, 0, data, 0, data.Length);
-                            return data;
+                            cs.CopyTo(decrypted);
+                            return decrypted.ToArray();
                         }
                     }
                 }

@@ -17,10 +17,10 @@ namespace Server.Algorithm
                 var length = BitConverter.ToInt32(lengthBytes, 0);
                 using (var decompressionStream = new GZipStream(source,
                     CompressionMode.Decompress))
+                using (var result = new MemoryStream(length))
                 {
-                    var result = new byte[length];
-                    decompressionStream.Read(result, 0, length);
-                    return result;
+                    decompressionStream.CopyTo(result);
+                    return result.ToArray();
                 }
             }
         }
