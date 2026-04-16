@@ -150,6 +150,8 @@
             // listView1
             // 
             this.listView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.listView1.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.listView1.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.lv_ip,
             this.lv_country,
@@ -637,6 +639,10 @@
             // 
             // statusStrip1
             // 
+            this.statusStrip1.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.statusStrip1.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
+            this.statusStrip1.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.statusStrip1.SizingGrip = false;
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel2,
@@ -649,6 +655,8 @@
             // 
             // toolStripStatusLabel2
             // 
+            this.toolStripStatusLabel2.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.toolStripStatusLabel2.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
             this.toolStripStatusLabel2.Size = new System.Drawing.Size(179, 25);
             this.toolStripStatusLabel2.Text = "[Notification]             ";
@@ -656,6 +664,8 @@
             // 
             // toolStripStatusLabel1
             // 
+            this.toolStripStatusLabel1.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.toolStripStatusLabel1.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(24, 25);
             this.toolStripStatusLabel1.Text = "...";
@@ -688,6 +698,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.tabPage1.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.tabPage1.Controls.Add(this.listView1);
             this.tabPage1.Location = new System.Drawing.Point(4, 29);
             this.tabPage1.Name = "tabPage1";
@@ -698,6 +710,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.tabPage2.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.tabPage2.Controls.Add(this.listView2);
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
             this.tabPage2.Name = "tabPage2";
@@ -710,6 +724,8 @@
             // listView2
             // 
             this.listView2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.listView2.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.listView2.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.listView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2});
@@ -755,6 +771,8 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.tabPage3.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.tabPage3.Controls.Add(this.listView3);
             this.tabPage3.Location = new System.Drawing.Point(4, 29);
             this.tabPage3.Name = "tabPage3";
@@ -766,6 +784,8 @@
             // listView3
             // 
             this.listView3.ContextMenuStrip = this.contextMenuThumbnail;
+            this.listView3.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.listView3.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.listView3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView3.HideSelection = false;
             this.listView3.LargeImageList = this.ThumbnailImageList;
@@ -810,6 +830,8 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.tabPage4.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.tabPage4.Controls.Add(this.listView4);
             this.tabPage4.Location = new System.Drawing.Point(4, 29);
             this.tabPage4.Name = "tabPage4";
@@ -822,6 +844,8 @@
             // listView4
             // 
             this.listView4.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.listView4.BackColor = System.Drawing.Color.FromArgb(22, 27, 34);
+            this.listView4.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.listView4.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader4,
             this.columnHeader5});
@@ -1011,6 +1035,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(13, 17, 23);
+            this.ForeColor = System.Drawing.Color.FromArgb(201, 209, 217);
             this.ClientSize = new System.Drawing.Size(1301, 511);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
