@@ -35,10 +35,10 @@ The following online servers / resources are used in this project
 * [github.com] - used for downloading and uploading changes to the project
 ### Installation & Deployment
 
-AsyncRAT requires the [.Net Framework](https://dotnet.microsoft.com/download/dotnet-framework/net46) v4 (client) and v4.6+ (server) to run.
+AsyncRAT requires the [.NET Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) v10 (net10.0-windows) to run.
 
 ```diff
-- to compile this project(s) visual studio 2019 or above to is required
+- to compile this project(s) visual studio 2022 or above is required
 ```
 
 ### Plugins

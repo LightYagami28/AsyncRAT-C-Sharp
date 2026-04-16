@@ -9,7 +9,6 @@ namespace Server.Helper
         {
             try
             {
-                var assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
                 var assembly = Assembly.LoadFrom(assemblyPath);
                 var paths = Array.ConvertAll(assembly.GetReferencedAssemblies(), a => a.FullName);
                 return paths;

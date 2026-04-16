@@ -170,7 +170,14 @@ namespace Miscellaneous.Handler
                     references,
                     new CSharpCompilationOptions(OutputKind.WindowsApplication, optimizationLevel: OptimizationLevel.Release));
 
-                compilation.Emit(outputAssembly);
+                var emitResult = compilation.Emit(outputAssembly);
+                if (!emitResult.Success)
+                {
+                    var errors = string.Join(", ", emitResult.Diagnostics
+                        .Where(d => d.Severity == DiagnosticSeverity.Error)
+                        .Select(d => d.GetMessage()));
+                    Debug.WriteLine("CompileFile errors: " + errors);
+                }
             }
             catch (Exception ex)
             {
