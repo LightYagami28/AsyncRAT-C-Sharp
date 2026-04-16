@@ -59,6 +59,7 @@
             this.runToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.stopToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.webcamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.microphoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miscellaneousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.botsKillerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uSBSpreadToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -304,7 +305,8 @@
             this.fileManagerToolStripMenuItem1,
             this.processManagerToolStripMenuItem1,
             this.reportWindowToolStripMenuItem,
-            this.webcamToolStripMenuItem});
+            this.webcamToolStripMenuItem,
+            this.microphoneToolStripMenuItem});
             this.monitoringToolStripMenuItem.Image = global::Server.Properties.Resources.monitoring_system;
             this.monitoringToolStripMenuItem.Name = "monitoringToolStripMenuItem";
             this.monitoringToolStripMenuItem.Size = new System.Drawing.Size(202, 32);
@@ -381,6 +383,13 @@
             this.webcamToolStripMenuItem.Size = new System.Drawing.Size(267, 34);
             this.webcamToolStripMenuItem.Text = "Webcam";
             this.webcamToolStripMenuItem.Click += new System.EventHandler(this.WebcamToolStripMenuItem_Click);
+            // 
+            // microphoneToolStripMenuItem
+            // 
+            this.microphoneToolStripMenuItem.Name = "microphoneToolStripMenuItem";
+            this.microphoneToolStripMenuItem.Size = new System.Drawing.Size(267, 34);
+            this.microphoneToolStripMenuItem.Text = "Microphone";
+            this.microphoneToolStripMenuItem.Click += new System.EventHandler(this.MicrophoneToolStripMenuItem_Click);
             // 
             // miscellaneousToolStripMenuItem
             // 
@@ -1111,6 +1120,7 @@
         private System.Windows.Forms.ToolStripMenuItem getAdminPrivilegesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem disableWindowsDefenderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem webcamToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem microphoneToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem xMRMinerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem runToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem killToolStripMenuItem;

