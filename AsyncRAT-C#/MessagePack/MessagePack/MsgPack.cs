@@ -364,7 +364,7 @@ namespace MessagePackLib.MessagePack
                 byte[] value = null;
                 FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
                 value = new byte[fs.Length];
-                fs.Read(value, 0, (int)fs.Length);
+                fs.ReadExactly(value, 0, (int)fs.Length);
                 fs.Close();
                 fs.Dispose();
                 SetAsBytes(value);
@@ -570,31 +570,31 @@ namespace MessagePackLib.MessagePack
             {  // max 255
                 len = ms.ReadByte();
                 rawByte = new byte[len];
-                ms.Read(rawByte, 0, len);
+                ms.ReadExactly(rawByte, 0, len);
                 SetAsBytes(rawByte);
             }
             else if (lvByte == 0xC5)
             {  // max 65535                
                 rawByte = new byte[2];
-                ms.Read(rawByte, 0, 2);
+                ms.ReadExactly(rawByte, 0, 2);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 len = BitConverter.ToUInt16(rawByte, 0);
 
                 // read binary
                 rawByte = new byte[len];
-                ms.Read(rawByte, 0, len);
+                ms.ReadExactly(rawByte, 0, len);
                 SetAsBytes(rawByte);
             }
             else if (lvByte == 0xC6)
             {  // binary max: 2^32-1                
                 rawByte = new byte[4];
-                ms.Read(rawByte, 0, 4);
+                ms.ReadExactly(rawByte, 0, 4);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 len = BitConverter.ToInt32(rawByte, 0);
 
                 // read binary
                 rawByte = new byte[len];
-                ms.Read(rawByte, 0, len);
+                ms.ReadExactly(rawByte, 0, len);
                 SetAsBytes(rawByte);
             }
             else if ((lvByte == 0xC7) || (lvByte == 0xC8) || (lvByte == 0xC9))
@@ -604,7 +604,7 @@ namespace MessagePackLib.MessagePack
             else if (lvByte == 0xCA)
             {  // float 32              
                 rawByte = new byte[4];
-                ms.Read(rawByte, 0, 4);
+                ms.ReadExactly(rawByte, 0, 4);
                 rawByte = BytesTools.SwapBytes(rawByte);
 
                 SetAsSingle(BitConverter.ToSingle(rawByte, 0));
@@ -612,7 +612,7 @@ namespace MessagePackLib.MessagePack
             else if (lvByte == 0xCB)
             {  // float 64              
                 rawByte = new byte[8];
-                ms.Read(rawByte, 0, 8);
+                ms.ReadExactly(rawByte, 0, 8);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 SetAsFloat(BitConverter.ToDouble(rawByte, 0));
             }
@@ -632,7 +632,7 @@ namespace MessagePackLib.MessagePack
                 //    |  0xcd  |ZZZZZZZZ|ZZZZZZZZ|
                 //    +--------+--------+--------+
                 rawByte = new byte[2];
-                ms.Read(rawByte, 0, 2);
+                ms.ReadExactly(rawByte, 0, 2);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 SetAsInteger(BitConverter.ToUInt16(rawByte, 0));
             }
@@ -643,7 +643,7 @@ namespace MessagePackLib.MessagePack
                 //  |  0xce  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ
                 //  +--------+--------+--------+--------+--------+
                 rawByte = new byte[4];
-                ms.Read(rawByte, 0, 4);
+                ms.ReadExactly(rawByte, 0, 4);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 SetAsInteger(BitConverter.ToUInt32(rawByte, 0));
             }
@@ -654,7 +654,7 @@ namespace MessagePackLib.MessagePack
                 //  |  0xcf  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|
                 //  +--------+--------+--------+--------+--------+--------+--------+--------+--------+
                 rawByte = new byte[8];
-                ms.Read(rawByte, 0, 8);
+                ms.ReadExactly(rawByte, 0, 8);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 SetAsUInt64(BitConverter.ToUInt64(rawByte, 0));
             }
@@ -664,7 +664,7 @@ namespace MessagePackLib.MessagePack
                 //      |  0xdc  |YYYYYYYY|YYYYYYYY|    N objects    |
                 //      +--------+--------+--------+~~~~~~~~~~~~~~~~~+
                 rawByte = new byte[2];
-                ms.Read(rawByte, 0, 2);
+                ms.ReadExactly(rawByte, 0, 2);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 len = BitConverter.ToInt16(rawByte, 0);
 
@@ -682,7 +682,7 @@ namespace MessagePackLib.MessagePack
                 //  |  0xdd  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|    N objects    |
                 //  +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
                 rawByte = new byte[4];
-                ms.Read(rawByte, 0, 4);
+                ms.ReadExactly(rawByte, 0, 4);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 len = BitConverter.ToInt16(rawByte, 0);
 
@@ -708,26 +708,7 @@ namespace MessagePackLib.MessagePack
                 //    |  0xde  |YYYYYYYY|YYYYYYYY|   N*2 objects   |
                 //    +--------+--------+--------+~~~~~~~~~~~~~~~~~+
                 rawByte = new byte[2];
-                ms.Read(rawByte, 0, 2);
-                rawByte = BytesTools.SwapBytes(rawByte);
-                len = BitConverter.ToInt16(rawByte, 0);
-
-                this.Clear();
-                this.valueType = MsgPackType.Map;
-                for (i = 0; i < len; i++)
-                {
-                    msgPack = InnerAdd();
-                    msgPack.SetName(ReadTools.ReadString(ms));
-                    msgPack.DecodeFromStream(ms);
-                }
-            }
-            else if (lvByte == 0xDE)
-            {
-                //    +--------+--------+--------+~~~~~~~~~~~~~~~~~+
-                //    |  0xde  |YYYYYYYY|YYYYYYYY|   N*2 objects   |
-                //    +--------+--------+--------+~~~~~~~~~~~~~~~~~+
-                rawByte = new byte[2];
-                ms.Read(rawByte, 0, 2);
+                ms.ReadExactly(rawByte, 0, 2);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 len = BitConverter.ToInt16(rawByte, 0);
 
@@ -746,7 +727,7 @@ namespace MessagePackLib.MessagePack
                 //    |  0xdf  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|   N*2 objects   |
                 //    +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
                 rawByte = new byte[4];
-                ms.Read(rawByte, 0, 4);
+                ms.ReadExactly(rawByte, 0, 4);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 len = BitConverter.ToInt32(rawByte, 0);
 
@@ -790,7 +771,7 @@ namespace MessagePackLib.MessagePack
                 //    |  0xd1  |ZZZZZZZZ|ZZZZZZZZ|
                 //    +--------+--------+--------+
                 rawByte = new byte[2];
-                ms.Read(rawByte, 0, 2);
+                ms.ReadExactly(rawByte, 0, 2);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 SetAsInteger(BitConverter.ToInt16(rawByte, 0));
             }
@@ -801,7 +782,7 @@ namespace MessagePackLib.MessagePack
                 //  |  0xd2  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|
                 //  +--------+--------+--------+--------+--------+
                 rawByte = new byte[4];
-                ms.Read(rawByte, 0, 4);
+                ms.ReadExactly(rawByte, 0, 4);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 SetAsInteger(BitConverter.ToInt32(rawByte, 0));
             }
@@ -812,7 +793,7 @@ namespace MessagePackLib.MessagePack
                 //  |  0xd3  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|
                 //  +--------+--------+--------+--------+--------+--------+--------+--------+--------+
                 rawByte = new byte[8];
-                ms.Read(rawByte, 0, 8);
+                ms.ReadExactly(rawByte, 0, 8);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 SetAsInteger(BitConverter.ToInt64(rawByte, 0));
             }

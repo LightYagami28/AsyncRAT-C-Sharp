@@ -11,14 +11,14 @@ namespace MessagePackLib.MessagePack
             using (var source = new MemoryStream(input))
             {
                 byte[] lengthBytes = new byte[4];
-                source.Read(lengthBytes, 0, 4);
+                source.ReadExactly(lengthBytes, 0, 4);
 
                 var length = BitConverter.ToInt32(lengthBytes, 0);
                 using (var decompressionStream = new GZipStream(source,
                     CompressionMode.Decompress))
                 {
                     var result = new byte[length];
-                    decompressionStream.Read(result, 0, length);
+                    decompressionStream.ReadExactly(result, 0, length);
                     return result;
                 }
             }

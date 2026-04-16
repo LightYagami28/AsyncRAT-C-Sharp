@@ -41,7 +41,7 @@ namespace Plugin
                     Debug.WriteLine("Microphone Plugin Connected!");
                     IsConnected = true;
                     SslClient = new SslStream(new NetworkStream(TcpClient, true), false, ValidateServerCertificate);
-                    SslClient.AuthenticateAsClient(TcpClient.RemoteEndPoint.ToString().Split(':')[0], null, SslProtocols.Tls, false);
+                    SslClient.AuthenticateAsClient(TcpClient.RemoteEndPoint.ToString().Split(':')[0], null, SslProtocols.None, false);
                     HeaderSize = 4;
                     Buffer = new byte[HeaderSize];
                     Offset = 0;
@@ -68,8 +68,9 @@ namespace Plugin
         {
 #if DEBUG
             return true;
-#endif
+#else
             return ServerCertificate.Equals(certificate);
+#endif
         }
 
         public static void Disconnected()

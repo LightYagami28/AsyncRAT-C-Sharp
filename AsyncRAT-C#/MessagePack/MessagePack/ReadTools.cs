@@ -12,7 +12,7 @@ namespace MessagePackLib.MessagePack
         public static String ReadString(Stream ms, int len)
         {
             byte[] rawBytes = new byte[len];
-            ms.Read(rawBytes, 0, len);
+            ms.ReadExactly(rawBytes, 0, len);
             return BytesTools.GetString(rawBytes);
         }
 
@@ -65,19 +65,19 @@ namespace MessagePackLib.MessagePack
             else if (strFlag == 0xDA)
             {
                 rawBytes = new byte[2];
-                ms.Read(rawBytes, 0, 2);
+                ms.ReadExactly(rawBytes, 0, 2);
                 rawBytes = BytesTools.SwapBytes(rawBytes);
                 len = BitConverter.ToUInt16(rawBytes, 0);
             }
             else if (strFlag == 0xDB)
             {
                 rawBytes = new byte[4];
-                ms.Read(rawBytes, 0, 4);
+                ms.ReadExactly(rawBytes, 0, 4);
                 rawBytes = BytesTools.SwapBytes(rawBytes);
                 len = BitConverter.ToInt32(rawBytes, 0);
             }
             rawBytes = new byte[len];
-            ms.Read(rawBytes, 0, len);
+            ms.ReadExactly(rawBytes, 0, len);
             return BytesTools.GetString(rawBytes);
         }
     }
