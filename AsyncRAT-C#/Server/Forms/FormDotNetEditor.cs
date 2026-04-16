@@ -1,12 +1,16 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using Server.MessagePack;
 using Server.Connection;
 using FastColoredTextBoxNS;
-using Microsoft.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.VisualBasic;
 using Microsoft.VisualBasic;
 using Server.Algorithm;
 
@@ -14,9 +18,6 @@ namespace Server.Forms
 {
     public partial class FormDotNetEditor : Form
     {
-        private Dictionary<string, string> providerOptions = new Dictionary<string, string>() {
-                {"CompilerVersion", "v4.0" }
-            };
         public FormDotNetEditor()
         {
             InitializeComponent();
@@ -274,59 +275,67 @@ End Namespace
             {
                 case "C#":
                     {
-                        Compiler(new CSharpCodeProvider(providerOptions), txtBox.Text, string.Join(",", reference).Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                        CompileWithRoslyn(isCSharp: true, txtBox.Text, string.Join(",", reference).Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
                         break;
                     }
 
                 case "VB.NET":
                     {
-                        Compiler(new VBCodeProvider(providerOptions), txtBox.Text, string.Join(",", reference).Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                        CompileWithRoslyn(isCSharp: false, txtBox.Text, string.Join(",", reference).Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
                         break;
                     }
             }
         }
 
-        private void Compiler(CodeDomProvider codeDomProvider, string source, string[] referencedAssemblies)
+        private void CompileWithRoslyn(bool isCSharp, string source, string[] referencedAssemblies)
         {
             try
             {
-                var providerOptions = new Dictionary<string, string>() {
-                {"CompilerVersion", "v4.0" }
-            };
+                var references = AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
+                    .Select(a => MetadataReference.CreateFromFile(a.Location))
+                    .Cast<MetadataReference>()
+                    .ToList();
 
-                var compilerOptions = "/target:winexe /platform:anycpu /optimize-";
+                foreach (var r in referencedAssemblies.Where(r => !string.IsNullOrWhiteSpace(r) && File.Exists(r)))
+                    references.Add(MetadataReference.CreateFromFile(r));
 
-                var compilerParameters = new CompilerParameters(referencedAssemblies)
+                Compilation compilation;
+                if (isCSharp)
                 {
-                    GenerateExecutable = true,
-                    GenerateInMemory = true,
-                    CompilerOptions = compilerOptions,
-                    TreatWarningsAsErrors = false,
-                    IncludeDebugInformation = false,
-                };
-                var compilerResults = codeDomProvider.CompileAssemblyFromSource(compilerParameters, source);
-
-                if (compilerResults.Errors.Count > 0)
+                    var syntaxTree = CSharpSyntaxTree.ParseText(source);
+                    compilation = CSharpCompilation.Create("DynamicAssembly", new[] { syntaxTree }, references,
+                        new CSharpCompilationOptions(OutputKind.WindowsApplication));
+                }
+                else
                 {
-                    foreach (CompilerError compilerError in compilerResults.Errors)
+                    var syntaxTree = VisualBasicSyntaxTree.ParseText(source);
+                    compilation = VisualBasicCompilation.Create("DynamicAssembly", new[] { syntaxTree }, references,
+                        new VisualBasicCompilationOptions(OutputKind.WindowsApplication));
+                }
+
+                using var ms = new MemoryStream();
+                var result = compilation.Emit(ms);
+
+                if (!result.Success)
+                {
+                    var errors = result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error);
+                    foreach (var error in errors)
                     {
-                        MessageBox.Show(string.Format("{0}\nLine: {1}", compilerError.ErrorText, compilerError.Line), "AsyncRAT | Dot Net Editor", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        var lineSpan = error.Location.GetLineSpan();
+                        MessageBox.Show(string.Format("{0}\nLine: {1}", error.GetMessage(), lineSpan.StartLinePosition.Line + 1),
+                            "AsyncRAT | Dot Net Editor", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         break;
                     }
                 }
                 else
                 {
-                    compilerResults = null;
                     MessageBox.Show("No Error!", "AsyncRAT | Dot Net Editor", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "AsyncRAT | Dot Net Editor", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
-            finally
-            {
-                //GC.Collect();
             }
         }
     }

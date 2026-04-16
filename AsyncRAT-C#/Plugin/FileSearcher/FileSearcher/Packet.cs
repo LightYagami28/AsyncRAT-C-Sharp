@@ -1,5 +1,5 @@
-﻿using Ionic.Zip;
-using MessagePackLib.MessagePack;
+﻿using MessagePackLib.MessagePack;
+using System.IO.Compression;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -111,13 +111,13 @@ namespace Plugin
             {
                 if (File.Exists(ZipfilePath)) File.Delete(ZipfilePath);
                 Thread.Sleep(500);
-                using (ZipFile zip = new ZipFile())
+                using (FileStream fs = new FileStream(ZipfilePath, FileMode.Create))
+                using (ZipArchive archive = new ZipArchive(fs, ZipArchiveMode.Create))
                 {
                     foreach (string file in files)
                     {
-                        zip.AddFile(file);
+                        archive.CreateEntryFromFile(file, Path.GetFileName(file));
                     }
-                    zip.Save(ZipfilePath);
                 }
                 return true;
             }

