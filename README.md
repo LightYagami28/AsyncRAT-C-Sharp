@@ -79,14 +79,9 @@ The following external services are used in this project:
 
 ## Installation & Deployment
 
-AsyncRAT has the following runtime requirements:
+AsyncRAT requires the [.NET Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) v10 (`net10.0-windows`) to run.
 
-| Component | Requirement |
-|-----------|-------------|
-| Client | [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework/net46) v4+ |
-| Server | [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework/net46) v4.6+ |
-
-> **Note:** Visual Studio 2019 or above is required to compile this project.
+> **Note:** Visual Studio 2022 or above is required to compile this project.
 
 ---
 
