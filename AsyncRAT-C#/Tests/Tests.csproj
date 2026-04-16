@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <RootNamespace>AsyncRAT.Tests</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Implicit_UsingsEnabled>disable</Implicit_UsingsEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.4.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Link Server Algorithm source files directly -->
+  <ItemGroup>
+    <Compile Include="..\Server\Algorithm\Aes256.cs" Link="ServerAlgorithm\Aes256.cs" />
+    <Compile Include="..\Server\Algorithm\Sha256.cs" Link="ServerAlgorithm\Sha256.cs" />
+    <Compile Include="..\Server\Algorithm\Zip.cs" Link="ServerAlgorithm\Zip.cs" />
+    <Compile Include="..\Server\Algorithm\GetHash.cs" Link="ServerAlgorithm\GetHash.cs" />
+  </ItemGroup>
+
+  <!-- Link Client Algorithm source files directly -->
+  <ItemGroup>
+    <Compile Include="..\Client\Algorithm\Aes256.cs" Link="ClientAlgorithm\Aes256.cs" />
+    <Compile Include="..\Client\Algorithm\Sha256.cs" Link="ClientAlgorithm\Sha256.cs" />
+  </ItemGroup>
+
+  <!-- Link Client Helper source files -->
+  <ItemGroup>
+    <Compile Include="..\Client\Helper\HwidGen.cs" Link="ClientHelper\HwidGen.cs" />
+  </ItemGroup>
+
+  <!-- MessagePack library project reference -->
+  <ItemGroup>
+    <ProjectReference Include="..\MessagePack\MessagePackLib.csproj" />
+  </ItemGroup>
+</Project>

